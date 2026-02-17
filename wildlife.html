@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WildLens - Wildlife Photography Platform</title>
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --forest: #2d4a22;
+      --forest-dark: #1a2e14;
+      --olive: #5a7247;
+      --sage: #8a9a5b;
+      --sand: #c2b280;
+      --cream: #f5f0e1;
+      --bark: #6b4226;
+      --bark-light: #8b5e3c;
+      --warm-white: #faf8f0;
+      --text-dark: #2c2c2c;
+      --text-muted: #6b6b6b;
+      --accent: #d4a03c;
+      --accent-hover: #b8892f;
+      --danger: #c0392b;
+      --shadow: rgba(0,0,0,0.12);
+      --shadow-lg: rgba(0,0,0,0.2);
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: var(--cream);
+      color: var(--text-dark);
+      line-height: 1.6;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      background: linear-gradient(135deg, var(--forest-dark), var(--forest), var(--olive));
+      color: var(--cream);
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px var(--shadow-lg);
+    }
+
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+    }
+
+    .logo h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .logo h1 span { color: var(--accent); }
+
+    nav {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    nav button {
+      background: transparent;
+      color: var(--cream);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.5rem 1.1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    nav button:hover,
+    nav button.active {
+      background: rgba(255,255,255,0.15);
+      border-color: var(--accent);
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      background: linear-gradient(to bottom, var(--forest-dark), var(--forest));
+      color: var(--cream);
+      text-align: center;
+      padding: 4rem 2rem 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='50' x='20' font-size='60' opacity='0.04'%3E🌿%3C/text%3E%3Ctext y='90' x='60' font-size='40' opacity='0.03'%3E🍃%3C/text%3E%3C/svg%3E");
+      background-size: 200px;
+    }
+
+    .hero h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      position: relative;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      opacity: 0.85;
+      max-width: 600px;
+      margin: 0 auto 1.5rem;
+      position: relative;
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 2.5rem;
+      position: relative;
+    }
+
+    .hero-stats div {
+      text-align: center;
+    }
+
+    .hero-stats strong {
+      display: block;
+      font-size: 1.8rem;
+      color: var(--accent);
+    }
+
+    .hero-stats span {
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
+
+    /* ===== SECTIONS ===== */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .section { display: none; padding: 2rem 0 3rem; }
+    .section.active { display: block; }
+
+    .section-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--forest);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 3px solid var(--sage);
+      display: inline-block;
+    }
+
+    /* ===== FILTER BAR ===== */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-btn {
+      padding: 0.45rem 1rem;
+      border: 2px solid var(--sage);
+      background: var(--warm-white);
+      color: var(--forest);
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover { background: var(--sage); color: #fff; }
+
+    .filter-btn.active {
+      background: var(--forest);
+      color: #fff;
+      border-color: var(--forest);
+    }
+
+    /* ===== GALLERY GRID ===== */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .photo-card {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px var(--shadow);
+      transition: transform 0.25s, box-shadow 0.25s;
+      cursor: pointer;
+    }
+
+    .photo-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px var(--shadow-lg);
+    }
+
+    .photo-card .photo-img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: block;
+      background: var(--sage);
+    }
+
+    .photo-card .photo-body {
+      padding: 1rem;
+    }
+
+    .photo-card .photo-title {
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: var(--forest-dark);
+      margin-bottom: 0.3rem;
+    }
+
+    .photo-card .photo-meta {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .photo-card .photo-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .tag {
+      font-size: 0.72rem;
+      padding: 0.2rem 0.55rem;
+      background: var(--cream);
+      color: var(--olive);
+      border-radius: 10px;
+      font-weight: 500;
+    }
+
+    .photo-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .like-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: color 0.2s;
+      padding: 0.25rem 0;
+    }
+
+    .like-btn:hover,
+    .like-btn.liked { color: var(--danger); }
+
+    .like-btn .heart { font-size: 1.1rem; }
+
+    .comment-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+
+    .comment-toggle:hover { color: var(--forest); }
+
+    /* ===== COMMENTS ===== */
+    .comments-section {
+      display: none;
+      padding: 0.8rem 1rem 1rem;
+      border-top: 1px solid #eee;
+      background: var(--warm-white);
+    }
+
+    .comments-section.open { display: block; }
+
+    .comment {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #eee;
+      font-size: 0.85rem;
+    }
+
+    .comment:last-of-type { border-bottom: none; }
+
+    .comment strong { color: var(--forest); }
+    .comment span { color: var(--text-muted); font-size: 0.75rem; }
+
+    .comment-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
+    }
+
+    .comment-form input {
+      flex: 1;
+      padding: 0.45rem 0.7rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+
+    .comment-form input:focus {
+      outline: none;
+      border-color: var(--sage);
+    }
+
+    .comment-form button {
+      padding: 0.45rem 0.9rem;
+      background: var(--forest);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.2s;
+    }
+
+    .comment-form button:hover { background: var(--forest-dark); }
+
+    /* ===== UPLOAD FORM ===== */
+    .upload-area {
+      max-width: 650px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .upload-area h3 {
+      color: var(--forest);
+      font-size: 1.2rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+      color: var(--forest-dark);
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--sage);
+    }
+
+    .form-group textarea { resize: vertical; min-height: 80px; }
+
+    .dropzone {
+      border: 2px dashed var(--sage);
+      border-radius: 12px;
+      padding: 2.5rem 1rem;
+      text-align: center;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      margin-bottom: 1.2rem;
+      position: relative;
+    }
+
+    .dropzone:hover {
+      background: rgba(90,114,71,0.05);
+      border-color: var(--forest);
+    }
+
+    .dropzone .drop-icon { font-size: 2.2rem; margin-bottom: 0.5rem; display: block; }
+    .dropzone .drop-text { font-size: 0.95rem; }
+    .dropzone .drop-hint { font-size: 0.8rem; margin-top: 0.3rem; }
+    .dropzone input { display: none; }
+
+    .preview-img {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 8px;
+      display: none;
+      margin: 0.8rem auto 0;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-weight: 400;
+      font-size: 0.88rem;
+      padding: 0.35rem 0.7rem;
+      border: 1px solid #ccc;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .checkbox-group label:has(input:checked) {
+      background: var(--forest);
+      color: #fff;
+      border-color: var(--forest);
+    }
+
+    .checkbox-group input { display: none; }
+
+    .submit-btn {
+      width: 100%;
+      padding: 0.8rem;
+      background: linear-gradient(135deg, var(--forest), var(--olive));
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .submit-btn:hover { opacity: 0.9; }
+
+    .upload-success {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .upload-success .checkmark {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .upload-success p { color: var(--forest); font-weight: 600; font-size: 1.1rem; }
+
+    /* ===== PHOTOGRAPHERS ===== */
+    .photographer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .photographer-card {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px var(--shadow);
+      transition: transform 0.25s;
+      cursor: pointer;
+    }
+
+    .photographer-card:hover { transform: translateY(-3px); }
+
+    .photographer-banner {
+      height: 90px;
+      background: linear-gradient(135deg, var(--forest), var(--olive), var(--sage));
+    }
+
+    .photographer-info {
+      padding: 1rem 1.2rem;
+      text-align: center;
+      margin-top: -35px;
+      position: relative;
+    }
+
+    .photographer-avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: 4px solid #fff;
+      object-fit: cover;
+      display: inline-block;
+      background: var(--sand);
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .photographer-name {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--forest-dark);
+      margin-top: 0.5rem;
+    }
+
+    .photographer-location {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .photographer-bio {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.8rem;
+      line-height: 1.5;
+    }
+
+    .photographer-stats {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      padding-top: 0.8rem;
+      border-top: 1px solid #eee;
+    }
+
+    .photographer-stats div { text-align: center; }
+    .photographer-stats strong { display: block; color: var(--forest); font-size: 1.1rem; }
+    .photographer-stats span { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* ===== PROFILE MODAL ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      max-width: 800px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+    }
+
+    .modal-header {
+      padding: 1.5rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+    }
+
+    .modal-header h3 {
+      font-size: 1.3rem;
+      color: var(--forest-dark);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 0.25rem;
+      line-height: 1;
+    }
+
+    .modal-close:hover { color: var(--danger); }
+
+    .modal-body { padding: 1.5rem 2rem 2rem; }
+
+    .modal-profile-header {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-profile-header img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--sage);
+    }
+
+    .modal-profile-header .info h4 {
+      font-size: 1.2rem;
+      color: var(--forest-dark);
+    }
+
+    .modal-profile-header .info p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .modal-photos {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .modal-photos img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+      transition: opacity 0.2s;
+    }
+
+    .modal-photos img:hover { opacity: 0.85; }
+
+    /* ===== PHOTO DETAIL MODAL ===== */
+    .photo-modal-body {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .photo-modal-body img {
+      width: 100%;
+      border-radius: 8px;
+      object-fit: cover;
+      max-height: 400px;
+    }
+
+    .photo-modal-details h4 {
+      font-size: 1.15rem;
+      color: var(--forest-dark);
+      margin-bottom: 0.3rem;
+    }
+
+    .photo-modal-details .meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.8rem;
+    }
+
+    .photo-modal-details .description {
+      font-size: 0.9rem;
+      color: var(--text-dark);
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+
+    .photo-modal-comments {
+      max-height: 200px;
+      overflow-y: auto;
+      border-top: 1px solid #eee;
+      padding-top: 0.8rem;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: var(--forest-dark);
+      color: var(--cream);
+      text-align: center;
+      padding: 2rem;
+      margin-top: 3rem;
+    }
+
+    footer p { opacity: 0.7; font-size: 0.88rem; }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .header-inner { flex-direction: column; gap: 0.8rem; }
+      nav { justify-content: center; }
+      .hero h2 { font-size: 1.8rem; }
+      .hero-stats { gap: 1.5rem; }
+      .gallery-grid { grid-template-columns: 1fr; }
+      .photo-modal-body { grid-template-columns: 1fr; }
+      .modal-profile-header { flex-direction: column; text-align: center; }
+    }
+
+    @media (max-width: 480px) {
+      .header-inner { padding: 0.8rem 1rem; }
+      .container { padding: 0 1rem; }
+      nav button { padding: 0.4rem 0.7rem; font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">W</div>
+      <h1>Wild<span>Lens</span></h1>
+    </div>
+    <nav>
+      <button class="active" data-section="gallery">Gallery</button>
+      <button data-section="upload">Upload</button>
+      <button data-section="photographers">Photographers</button>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <h2>Share the Wild World Through Your Lens</h2>
+  <p>A community for wildlife photographers to upload, discover, and celebrate the beauty of nature.</p>
+  <div class="hero-stats">
+    <div><strong id="stat-photos">24</strong><span>Photos</span></div>
+    <div><strong id="stat-photographers">6</strong><span>Photographers</span></div>
+    <div><strong id="stat-categories">8</strong><span>Categories</span></div>
+  </div>
+</section>
+
+<div class="container">
+
+  <!-- ============ GALLERY SECTION ============ -->
+  <section id="section-gallery" class="section active">
+    <h2 class="section-title">Explore Wildlife Photography</h2>
+    <div class="filter-bar" id="filter-bar"></div>
+    <div class="gallery-grid" id="gallery-grid"></div>
+  </section>
+
+  <!-- ============ UPLOAD SECTION ============ -->
+  <section id="section-upload" class="section">
+    <h2 class="section-title">Share Your Work</h2>
+    <div class="upload-area">
+      <h3>Upload a Wildlife Photo</h3>
+      <div class="dropzone" id="dropzone">
+        <span class="drop-icon">&#128247;</span>
+        <span class="drop-text">Click or drag a photo here</span>
+        <span class="drop-hint">JPG, PNG, WEBP up to 10 MB</span>
+        <input type="file" id="file-input" accept="image/*">
+      </div>
+      <img class="preview-img" id="preview-img" alt="Preview">
+      <form id="upload-form">
+        <div class="form-group">
+          <label for="photo-title">Photo Title</label>
+          <input type="text" id="photo-title" placeholder="e.g. Golden Eagle at Sunset" required>
+        </div>
+        <div class="form-group">
+          <label for="photo-description">Description</label>
+          <textarea id="photo-description" placeholder="Tell the story behind this shot..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="photo-location">Location</label>
+          <input type="text" id="photo-location" placeholder="e.g. Yellowstone National Park, USA">
+        </div>
+        <div class="form-group">
+          <label for="photographer-select">Photographer</label>
+          <select id="photographer-select"></select>
+        </div>
+        <div class="form-group">
+          <label>Categories</label>
+          <div class="checkbox-group" id="category-checkboxes"></div>
+        </div>
+        <button type="submit" class="submit-btn">Upload Photo</button>
+      </form>
+      <div class="upload-success" id="upload-success">
+        <span class="checkmark">&#10004;</span>
+        <p>Photo uploaded successfully!</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PHOTOGRAPHERS SECTION ============ -->
+  <section id="section-photographers" class="section">
+    <h2 class="section-title">Meet the Photographers</h2>
+    <div class="photographer-grid" id="photographer-grid"></div>
+  </section>
+
+</div>
+
+<!-- ============ MODAL ============ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Title</h3>
+      <button class="modal-close" id="modal-close">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <p>WildLens &mdash; Wildlife Photography Platform &copy; 2026. Built with care for nature.</p>
+</footer>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const CATEGORIES = [
+  'All', 'Birds', 'Mammals', 'Marine', 'Reptiles',
+  'Insects', 'Amphibians', 'Landscapes', 'Macro'
+];
+
+const PHOTOGRAPHERS = [
+  {
+    id: 1,
+    name: 'Elena Vasquez',
+    location: 'Costa Rica',
+    bio: 'Tropical bird specialist with 12 years in the field. Passionate about capturing rare species in their natural habitat.',
+    avatar: 'https://picsum.photos/seed/elena/200/200',
+    photos: 6
+  },
+  {
+    id: 2,
+    name: 'James Okafor',
+    location: 'Kenya',
+    bio: 'Safari guide turned photographer. Documents the great migration and African savanna wildlife.',
+    avatar: 'https://picsum.photos/seed/james/200/200',
+    photos: 5
+  },
+  {
+    id: 3,
+    name: 'Yuki Tanaka',
+    location: 'Japan',
+    bio: 'Underwater and marine life photographer. Dives deep to bring ocean creatures into focus.',
+    avatar: 'https://picsum.photos/seed/yuki/200/200',
+    photos: 4
+  },
+  {
+    id: 4,
+    name: 'Sarah Mitchell',
+    location: 'Canada',
+    bio: 'Northern wilderness photographer specializing in bears, wolves, and boreal forest ecosystems.',
+    avatar: 'https://picsum.photos/seed/sarah/200/200',
+    photos: 4
+  },
+  {
+    id: 5,
+    name: 'Carlos Mendoza',
+    location: 'Ecuador',
+    bio: 'Macro photography expert capturing the intricate world of insects and amphibians in the Amazon.',
+    avatar: 'https://picsum.photos/seed/carlos/200/200',
+    photos: 3
+  },
+  {
+    id: 6,
+    name: 'Anika Patel',
+    location: 'India',
+    bio: 'Tiger conservationist and photographer working in Indian national parks to raise awareness.',
+    avatar: 'https://picsum.photos/seed/anika/200/200',
+    photos: 2
+  }
+];
+
+const MOCK_PHOTOS = [
+  {
+    id: 1, title: 'Resplendent Quetzal in Flight', photographer: 1,
+    description: 'Caught this rare quetzal mid-flight in the Monteverde Cloud Forest. The iridescent green plumage was breathtaking against the misty canopy.',
+    location: 'Monteverde, Costa Rica', categories: ['Birds'],
+    img: 'https://picsum.photos/seed/quetzal/600/400',
+    likes: 48, comments: [
+      { user: 'NatureFan22', text: 'Absolutely stunning capture!', time: '2 days ago' },
+      { user: 'BirdWatcher', text: 'The colors are incredible', time: '1 day ago' }
+    ]
+  },
+  {
+    id: 2, title: 'Elephant Herd at Dusk', photographer: 2,
+    description: 'A family of elephants crossing the Mara River at golden hour. The dust and light created a painterly atmosphere.',
+    location: 'Masai Mara, Kenya', categories: ['Mammals'],
+    img: 'https://picsum.photos/seed/elephants/600/400',
+    likes: 72, comments: [
+      { user: 'WildlifeDaily', text: 'The golden light is perfect here', time: '3 days ago' }
+    ]
+  },
+  {
+    id: 3, title: 'Humpback Whale Breach', photographer: 3,
+    description: 'Witnessed this magnificent humpback whale breaching off the coast of Okinawa. The power and grace was humbling.',
+    location: 'Okinawa, Japan', categories: ['Marine'],
+    img: 'https://picsum.photos/seed/whale/600/400',
+    likes: 95, comments: [
+      { user: 'OceanLover', text: 'What an incredible moment to witness!', time: '5 days ago' },
+      { user: 'MarineBio', text: 'Great timing on this shot', time: '4 days ago' }
+    ]
+  },
+  {
+    id: 4, title: 'Scarlet Macaw Pair', photographer: 1,
+    description: 'A bonded pair of scarlet macaws sharing a branch in Corcovado. These birds mate for life.',
+    location: 'Corcovado National Park, Costa Rica', categories: ['Birds'],
+    img: 'https://picsum.photos/seed/macaws/600/400',
+    likes: 34, comments: []
+  },
+  {
+    id: 5, title: 'Leopard in the Tree', photographer: 2,
+    description: 'This leopard had just hoisted its impala kill into an acacia tree. Pure survival instinct on display.',
+    location: 'Serengeti, Tanzania', categories: ['Mammals'],
+    img: 'https://picsum.photos/seed/leopard/600/400',
+    likes: 61, comments: [
+      { user: 'SafariKing', text: 'Leopards are so elusive, great find!', time: '1 week ago' }
+    ]
+  },
+  {
+    id: 6, title: 'Sea Turtle Portrait', photographer: 3,
+    description: 'A green sea turtle gliding through crystal-clear waters. Shot during a dawn dive at 15 meters depth.',
+    location: 'Great Barrier Reef, Australia', categories: ['Marine', 'Reptiles'],
+    img: 'https://picsum.photos/seed/turtle/600/400',
+    likes: 53, comments: []
+  },
+  {
+    id: 7, title: 'Grizzly Bear Fishing', photographer: 4,
+    description: 'A grizzly bear snatching salmon from the rapids during the annual run. Raw power and precision.',
+    location: 'British Columbia, Canada', categories: ['Mammals'],
+    img: 'https://picsum.photos/seed/grizzly/600/400',
+    likes: 87, comments: [
+      { user: 'BearTracker', text: 'Perfect action shot!', time: '2 weeks ago' },
+      { user: 'NaturePhotog', text: 'The water spray adds so much drama', time: '1 week ago' }
+    ]
+  },
+  {
+    id: 8, title: 'Blue Morpho Butterfly', photographer: 5,
+    description: 'Macro shot of a blue morpho butterfly resting on a leaf. The wing scales create an almost metallic blue sheen.',
+    location: 'Yasuni National Park, Ecuador', categories: ['Insects', 'Macro'],
+    img: 'https://picsum.photos/seed/morpho/600/400',
+    likes: 41, comments: []
+  },
+  {
+    id: 9, title: 'Red-Eyed Tree Frog', photographer: 5,
+    description: 'This iconic frog was found during a nighttime hike. Its vivid colors serve as a startle defense against predators.',
+    location: 'Amazon Basin, Ecuador', categories: ['Amphibians', 'Macro'],
+    img: 'https://picsum.photos/seed/treefrog/600/400',
+    likes: 56, comments: [
+      { user: 'HerpLover', text: 'Those colors are unreal!', time: '3 days ago' }
+    ]
+  },
+  {
+    id: 10, title: 'Snowy Owl on the Tundra', photographer: 4,
+    description: 'A snowy owl surveying the frozen landscape. Taken during an Arctic expedition in -30C temperatures.',
+    location: 'Churchill, Manitoba, Canada', categories: ['Birds'],
+    img: 'https://picsum.photos/seed/snowyowl/600/400',
+    likes: 68, comments: []
+  },
+  {
+    id: 11, title: 'Bengal Tiger at Waterhole', photographer: 6,
+    description: 'A dominant male Bengal tiger cooling off at a forest waterhole during the scorching Indian summer.',
+    location: 'Ranthambore, India', categories: ['Mammals'],
+    img: 'https://picsum.photos/seed/tiger/600/400',
+    likes: 112, comments: [
+      { user: 'TigerFan', text: 'Magnificent animal, great shot!', time: '6 days ago' },
+      { user: 'ConservNow', text: 'Important work documenting these cats', time: '5 days ago' },
+      { user: 'PhotoPro', text: 'The reflection in the water is a nice touch', time: '4 days ago' }
+    ]
+  },
+  {
+    id: 12, title: 'Kingfisher Dive', photographer: 1,
+    description: 'A kingfisher plunging into the river to catch fish. High-speed capture at 1/4000s.',
+    location: 'Tortuguero, Costa Rica', categories: ['Birds'],
+    img: 'https://picsum.photos/seed/kingfisher/600/400',
+    likes: 44, comments: []
+  },
+  {
+    id: 13, title: 'Lion Pride at Rest', photographer: 2,
+    description: 'An entire lion pride resting under an acacia tree during the midday heat. Six cubs were nursing.',
+    location: 'Amboseli, Kenya', categories: ['Mammals'],
+    img: 'https://picsum.photos/seed/lions/600/400',
+    likes: 79, comments: [
+      { user: 'AfricaDreams', text: 'The cubs make this photo', time: '1 week ago' }
+    ]
+  },
+  {
+    id: 14, title: 'Coral Reef Ecosystem', photographer: 3,
+    description: 'A thriving coral reef teeming with clownfish and anemones. A reminder of what we need to protect.',
+    location: 'Raja Ampat, Indonesia', categories: ['Marine', 'Landscapes'],
+    img: 'https://picsum.photos/seed/coralreef/600/400',
+    likes: 63, comments: []
+  },
+  {
+    id: 15, title: 'Arctic Fox in Winter Coat', photographer: 4,
+    description: 'An Arctic fox in its pure white winter fur, nearly invisible against the snow. Only its dark eyes gave it away.',
+    location: 'Yukon, Canada', categories: ['Mammals'],
+    img: 'https://picsum.photos/seed/arcticfox/600/400',
+    likes: 58, comments: [
+      { user: 'ArcticExp', text: 'Camouflage at its finest!', time: '4 days ago' }
+    ]
+  },
+  {
+    id: 16, title: 'Chameleon Close-Up', photographer: 5,
+    description: 'Incredible macro details of a panther chameleon. Each scale is a tiny work of art.',
+    location: 'Yasuni, Ecuador', categories: ['Reptiles', 'Macro'],
+    img: 'https://picsum.photos/seed/chameleon/600/400',
+    likes: 37, comments: []
+  },
+  {
+    id: 17, title: 'Toucan in the Canopy', photographer: 1,
+    description: 'A keel-billed toucan perched high in the canopy, its colorful bill contrasting against the green foliage.',
+    location: 'Arenal, Costa Rica', categories: ['Birds'],
+    img: 'https://picsum.photos/seed/toucan/600/400',
+    likes: 51, comments: []
+  },
+  {
+    id: 18, title: 'Wildebeest Migration', photographer: 2,
+    description: 'Thousands of wildebeest crossing the Mara River during the great migration. Nature at its most dramatic.',
+    location: 'Masai Mara, Kenya', categories: ['Mammals', 'Landscapes'],
+    img: 'https://picsum.photos/seed/migration/600/400',
+    likes: 93, comments: [
+      { user: 'MigrationWatch', text: 'The scale of this event never gets old', time: '2 weeks ago' }
+    ]
+  },
+  {
+    id: 19, title: 'Mantis Portrait', photographer: 5,
+    description: 'A praying mantis caught mid-grooming. The compound eyes and raptorial forelegs are fascinating up close.',
+    location: 'Cuyabeno Reserve, Ecuador', categories: ['Insects', 'Macro'],
+    img: 'https://picsum.photos/seed/mantis/600/400',
+    likes: 29, comments: []
+  },
+  {
+    id: 20, title: 'Indian Peacock Display', photographer: 6,
+    description: 'A male peacock in full courtship display, its iridescent tail feathers fanned out in the morning light.',
+    location: 'Keoladeo, India', categories: ['Birds'],
+    img: 'https://picsum.photos/seed/peacock/600/400',
+    likes: 84, comments: [
+      { user: 'AvianArt', text: 'The symmetry of the tail is mesmerizing', time: '1 week ago' }
+    ]
+  },
+  {
+    id: 21, title: 'Jellyfish Bloom', photographer: 3,
+    description: 'A bloom of moon jellyfish drifting in the current. Their translucent bodies glow in the underwater light.',
+    location: 'Palau', categories: ['Marine'],
+    img: 'https://picsum.photos/seed/jellyfish/600/400',
+    likes: 47, comments: []
+  },
+  {
+    id: 22, title: 'Wolf Pack in Snow', photographer: 4,
+    description: 'A wolf pack traversing a frozen lake at dawn. Their social bonds and teamwork are remarkable.',
+    location: 'Algonquin Park, Canada', categories: ['Mammals'],
+    img: 'https://picsum.photos/seed/wolves/600/400',
+    likes: 76, comments: [
+      { user: 'WolfWatch', text: 'Pack dynamics are incredible to observe', time: '5 days ago' }
+    ]
+  },
+  {
+    id: 23, title: 'Flamingo Flock', photographer: 1,
+    description: 'Hundreds of flamingos taking flight at Lake Nakuru. The pink cloud against the blue sky was surreal.',
+    location: 'Lake Nakuru, Kenya', categories: ['Birds', 'Landscapes'],
+    img: 'https://picsum.photos/seed/flamingos/600/400',
+    likes: 65, comments: []
+  },
+  {
+    id: 24, title: 'Poison Dart Frog', photographer: 1,
+    description: 'A tiny but vibrant poison dart frog on the forest floor. Its bright colors warn predators of its toxicity.',
+    location: 'La Selva, Costa Rica', categories: ['Amphibians', 'Macro'],
+    img: 'https://picsum.photos/seed/dartfrog/600/400',
+    likes: 39, comments: [
+      { user: 'TropicalHerps', text: 'Such vivid warning colors!', time: '2 days ago' }
+    ]
+  }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let photos = [...MOCK_PHOTOS];
+let activeFilter = 'All';
+let likedPhotos = JSON.parse(localStorage.getItem('wl_likes') || '{}');
+let userComments = JSON.parse(localStorage.getItem('wl_comments') || '{}');
+
+// Merge saved comments into photo data
+for (const [photoId, cmts] of Object.entries(userComments)) {
+  const photo = photos.find(p => p.id === Number(photoId));
+  if (photo) {
+    photo.comments = [...photo.comments, ...cmts];
+  }
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('section-' + btn.dataset.section).classList.add('active');
+  });
+});
+
+// ============================================================
+// FILTER BAR
+// ============================================================
+function renderFilters() {
+  const bar = document.getElementById('filter-bar');
+  bar.innerHTML = '';
+  CATEGORIES.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn' + (cat === activeFilter ? ' active' : '');
+    btn.textContent = cat;
+    btn.addEventListener('click', () => {
+      activeFilter = cat;
+      renderFilters();
+      renderGallery();
+    });
+    bar.appendChild(btn);
+  });
+}
+
+// ============================================================
+// GALLERY
+// ============================================================
+function renderGallery() {
+  const grid = document.getElementById('gallery-grid');
+  grid.innerHTML = '';
+
+  const filtered = activeFilter === 'All'
+    ? photos
+    : photos.filter(p => p.categories.includes(activeFilter));
+
+  filtered.forEach(photo => {
+    const photographer = PHOTOGRAPHERS.find(p => p.id === photo.photographer);
+    const isLiked = likedPhotos[photo.id];
+    const likeCount = photo.likes + (isLiked ? 1 : 0);
+
+    const card = document.createElement('div');
+    card.className = 'photo-card';
+    card.dataset.id = photo.id;
+
+    card.innerHTML = `
+      <img class="photo-img" src="${photo.img}" alt="${photo.title}" loading="lazy">
+      <div class="photo-body">
+        <div class="photo-title">${photo.title}</div>
+        <div class="photo-meta">by ${photographer ? photographer.name : 'Unknown'} &middot; ${photo.location}</div>
+        <div class="photo-tags">
+          ${photo.categories.map(c => `<span class="tag">${c}</span>`).join('')}
+        </div>
+        <div class="photo-actions">
+          <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${photo.id}">
+            <span class="heart">${isLiked ? '&#9829;' : '&#9825;'}</span>
+            <span class="like-count">${likeCount}</span>
+          </button>
+          <button class="comment-toggle" data-id="${photo.id}">
+            &#128172; ${photo.comments.length} comment${photo.comments.length !== 1 ? 's' : ''}
+          </button>
+        </div>
+      </div>
+      <div class="comments-section" id="comments-${photo.id}">
+        ${photo.comments.map(c => `
+          <div class="comment"><strong>${c.user}</strong> ${c.text} <span>${c.time}</span></div>
+        `).join('')}
+        <div class="comment-form">
+          <input type="text" placeholder="Add a comment..." data-id="${photo.id}">
+          <button data-id="${photo.id}">Post</button>
+        </div>
+      </div>
+    `;
+
+    grid.appendChild(card);
+  });
+
+  // Event: Like
+  grid.querySelectorAll('.like-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = Number(btn.dataset.id);
+      likedPhotos[id] = !likedPhotos[id];
+      localStorage.setItem('wl_likes', JSON.stringify(likedPhotos));
+      renderGallery();
+    });
+  });
+
+  // Event: Toggle comments
+  grid.querySelectorAll('.comment-toggle').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const sec = document.getElementById('comments-' + btn.dataset.id);
+      sec.classList.toggle('open');
+    });
+  });
+
+  // Event: Post comment
+  grid.querySelectorAll('.comment-form button').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = Number(btn.dataset.id);
+      const input = btn.previousElementSibling;
+      const text = input.value.trim();
+      if (!text) return;
+
+      const comment = { user: 'You', text, time: 'Just now' };
+      const photo = photos.find(p => p.id === id);
+      photo.comments.push(comment);
+
+      if (!userComments[id]) userComments[id] = [];
+      userComments[id].push(comment);
+      localStorage.setItem('wl_comments', JSON.stringify(userComments));
+
+      input.value = '';
+      renderGallery();
+      // Re-open comments section
+      document.getElementById('comments-' + id).classList.add('open');
+    });
+  });
+
+  // Event: Open photo detail modal
+  grid.querySelectorAll('.photo-img').forEach(img => {
+    img.addEventListener('click', () => {
+      const id = Number(img.closest('.photo-card').dataset.id);
+      openPhotoModal(id);
+    });
+  });
+}
+
+// ============================================================
+// PHOTO DETAIL MODAL
+// ============================================================
+function openPhotoModal(id) {
+  const photo = photos.find(p => p.id === id);
+  if (!photo) return;
+  const photographer = PHOTOGRAPHERS.find(p => p.id === photo.photographer);
+
+  document.getElementById('modal-title').textContent = photo.title;
+  const body = document.getElementById('modal-body');
+  body.innerHTML = `
+    <div class="photo-modal-body">
+      <img src="${photo.img}" alt="${photo.title}">
+      <div class="photo-modal-details">
+        <h4>${photo.title}</h4>
+        <p class="meta">by ${photographer ? photographer.name : 'Unknown'} &middot; ${photo.location}</p>
+        <p class="description">${photo.description}</p>
+        <div class="photo-tags" style="margin-bottom:1rem;">
+          ${photo.categories.map(c => `<span class="tag">${c}</span>`).join('')}
+        </div>
+        <div class="photo-modal-comments">
+          <strong style="font-size:0.9rem;color:var(--forest);">Comments (${photo.comments.length})</strong>
+          ${photo.comments.map(c => `
+            <div class="comment"><strong>${c.user}</strong> ${c.text} <span>${c.time}</span></div>
+          `).join('')}
+          ${photo.comments.length === 0 ? '<p style="font-size:0.85rem;color:var(--text-muted);margin-top:0.5rem;">No comments yet.</p>' : ''}
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+// ============================================================
+// PHOTOGRAPHERS
+// ============================================================
+function renderPhotographers() {
+  const grid = document.getElementById('photographer-grid');
+  grid.innerHTML = '';
+
+  PHOTOGRAPHERS.forEach(p => {
+    const photoCount = photos.filter(ph => ph.photographer === p.id).length;
+    const totalLikes = photos.filter(ph => ph.photographer === p.id)
+      .reduce((sum, ph) => sum + ph.likes, 0);
+
+    const card = document.createElement('div');
+    card.className = 'photographer-card';
+    card.innerHTML = `
+      <div class="photographer-banner"></div>
+      <div class="photographer-info">
+        <img class="photographer-avatar" src="${p.avatar}" alt="${p.name}" loading="lazy">
+        <div class="photographer-name">${p.name}</div>
+        <div class="photographer-location">${p.location}</div>
+        <div class="photographer-bio">${p.bio}</div>
+        <div class="photographer-stats">
+          <div><strong>${photoCount}</strong><span>Photos</span></div>
+          <div><strong>${totalLikes}</strong><span>Likes</span></div>
+        </div>
+      </div>
+    `;
+
+    card.addEventListener('click', () => openPhotographerModal(p.id));
+    grid.appendChild(card);
+  });
+}
+
+function openPhotographerModal(id) {
+  const p = PHOTOGRAPHERS.find(ph => ph.id === id);
+  if (!p) return;
+  const pPhotos = photos.filter(ph => ph.photographer === id);
+
+  document.getElementById('modal-title').textContent = p.name;
+  const body = document.getElementById('modal-body');
+  body.innerHTML = `
+    <div class="modal-profile-header">
+      <img src="${p.avatar}" alt="${p.name}">
+      <div class="info">
+        <h4>${p.name}</h4>
+        <p>${p.location}</p>
+        <p style="margin-top:0.4rem;">${p.bio}</p>
+      </div>
+    </div>
+    <h4 style="margin-bottom:0.8rem;color:var(--forest);">Photos by ${p.name} (${pPhotos.length})</h4>
+    <div class="modal-photos">
+      ${pPhotos.map(ph => `<img src="${ph.img}" alt="${ph.title}" title="${ph.title}" loading="lazy">`).join('')}
+    </div>
+  `;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+// ============================================================
+// MODAL CLOSE
+// ============================================================
+document.getElementById('modal-close').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.remove('open');
+});
+
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) {
+    e.currentTarget.classList.remove('open');
+  }
+});
+
+// ============================================================
+// UPLOAD FORM
+// ============================================================
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('file-input');
+const previewImg = document.getElementById('preview-img');
+let uploadedFile = null;
+
+dropzone.addEventListener('click', () => fileInput.click());
+dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.style.borderColor = 'var(--forest)'; });
+dropzone.addEventListener('dragleave', () => { dropzone.style.borderColor = 'var(--sage)'; });
+dropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.style.borderColor = 'var(--sage)';
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) handleFile(fileInput.files[0]);
+});
+
+function handleFile(file) {
+  uploadedFile = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    previewImg.src = e.target.result;
+    previewImg.style.display = 'block';
+    dropzone.querySelector('.drop-text').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Populate photographer select and category checkboxes
+function populateUploadForm() {
+  const select = document.getElementById('photographer-select');
+  select.innerHTML = PHOTOGRAPHERS.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+
+  const checkboxes = document.getElementById('category-checkboxes');
+  checkboxes.innerHTML = CATEGORIES.filter(c => c !== 'All').map(c => `
+    <label><input type="checkbox" value="${c}"> ${c}</label>
+  `).join('');
+}
+
+document.getElementById('upload-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const title = document.getElementById('photo-title').value.trim();
+  const description = document.getElementById('photo-description').value.trim();
+  const location = document.getElementById('photo-location').value.trim();
+  const photographerId = Number(document.getElementById('photographer-select').value);
+  const selectedCats = [...document.querySelectorAll('#category-checkboxes input:checked')]
+    .map(cb => cb.value);
+
+  if (!title || !description) return;
+  if (selectedCats.length === 0) selectedCats.push('Landscapes');
+
+  const newPhoto = {
+    id: Date.now(),
+    title,
+    description,
+    location: location || 'Unknown',
+    photographer: photographerId,
+    categories: selectedCats,
+    img: uploadedFile ? previewImg.src : `https://picsum.photos/seed/${encodeURIComponent(title)}/600/400`,
+    likes: 0,
+    comments: []
+  };
+
+  photos.unshift(newPhoto);
+  updateStats();
+  renderGallery();
+  renderPhotographers();
+
+  // Show success
+  document.getElementById('upload-form').style.display = 'none';
+  document.getElementById('dropzone').style.display = 'none';
+  previewImg.style.display = 'none';
+  const success = document.getElementById('upload-success');
+  success.style.display = 'block';
+
+  setTimeout(() => {
+    success.style.display = 'none';
+    document.getElementById('upload-form').style.display = 'block';
+    document.getElementById('dropzone').style.display = 'block';
+    document.getElementById('upload-form').reset();
+    dropzone.querySelector('.drop-text').textContent = 'Click or drag a photo here';
+    uploadedFile = null;
+  }, 2000);
+});
+
+// ============================================================
+// STATS
+// ============================================================
+function updateStats() {
+  document.getElementById('stat-photos').textContent = photos.length;
+  const uniquePhotographers = new Set(photos.map(p => p.photographer)).size;
+  document.getElementById('stat-photographers').textContent = uniquePhotographers;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderFilters();
+renderGallery();
+renderPhotographers();
+populateUploadForm();
+updateStats();
+</script>
+</body>
+</html>
